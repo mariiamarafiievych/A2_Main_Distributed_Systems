@@ -50,19 +50,19 @@ public class Main {
 
         ResponseEntity<CustomerDTO> response4 = restTemplate
                 .exchange(URL + "/customers/getAll", HttpMethod.GET, headersEntity, CustomerDTO.class);
-        System.out.println("___________________________________________" + "\nCustomers: ");
+        System.out.println("\nCustomers: ");
         for (Customer c : Objects.requireNonNull(response4.getBody()).getCustomers()) {
             System.out.println(c);
         }
-        System.out.println("\n___________________________________________");
+        System.out.println("\n");
 
         ResponseEntity<OrdersDTO> response5 = restTemplate
                 .exchange(URL + "/orders/getAll", HttpMethod.GET, headersEntity, OrdersDTO.class);
-        System.out.println("___________________________________________" + "\nOrders: ");
+        System.out.println("\nOrders: ");
         for (Order o : Objects.requireNonNull(response5.getBody()).getOrders()) {
             System.out.println(o);
         }
-        System.out.println("\n___________________________________________");
+        System.out.println("\n");
     }
 
     private static void makeOrder(Customer customer, Supplier supplier, List<Item> bucketForCustomer) {
@@ -106,12 +106,12 @@ public class Main {
 
     private static void printItems(List<Item> items) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("\n___________________________________________");
+        stringBuilder.append("\n");
         stringBuilder.append("\nItems: ");
         for (Item th : items) {
             stringBuilder.append("\n").append(th);
         }
-        stringBuilder.append("\n___________________________________________");
+        stringBuilder.append("\n");
 
         System.out.println(stringBuilder.toString());
     }
