@@ -5,7 +5,9 @@ import entities.dto.*;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.Array;
 import java.util.*;
+
 
 public class Main {
     private static final String URL = "http://localhost:8081";
@@ -23,45 +25,43 @@ public class Main {
 
         addItemsOnSite(supplier1, addedItems, quantities);
 
-        ResponseEntity<ItemsDTO> response2 = restTemplate
-                .exchange(URL + "/items/getAll", HttpMethod.GET, headersEntity, ItemsDTO.class);
-        printItems(Objects.requireNonNull(response2.getBody()).getItems());
+        ResponseEntity<Item[]> response2 = restTemplate
+                .exchange(URL + "/items", HttpMethod.GET, headersEntity, Item[].class);
+        List<Item> things = Arrays.asList(Objects.requireNonNull(response2.getBody()));
+        System.out.println(things);
 
         response2 = restTemplate
-                .exchange(URL + "/items/getAll", HttpMethod.GET, headersEntity, ItemsDTO.class);
-        List<Item> itemstoOrder = Objects.requireNonNull(response2.getBody()).getItems();
-        printItems(itemstoOrder);
+                .exchange(URL + "/items", HttpMethod.GET, headersEntity, Item[].class);
+        List<Item> thingsForSale = Arrays.asList(Objects.requireNonNull(response2.getBody()));
+        System.out.println(thingsForSale);
 
         Customer customer1 = new Customer( "Mariia", "Pinchuk");
         Customer customer2 = new Customer( "Kseniia", "Zayets");
 
         System.out.println("Trying to create new order");
-        List<Item> CustomerShopCart1 = new ArrayList<>(itemstoOrder.subList(0, 2));
-        makeOrder(customer1, supplier1, CustomerShopCart1);
+        List<Item> bucketForCustomer1 = new ArrayList<>(thingsForSale.subList(0, 2));
+        makeOrder(customer1, supplier1, bucketForCustomer1);
 
         System.out.println("Trying to create new order");
-        List<Item> CustomerShopCart2 = new ArrayList<>(itemstoOrder.subList(2, 5));
-
-        makeOrder(customer2, supplier1, CustomerShopCart2);
+        List<Item> bucketForCustomer2 = new ArrayList<>(thingsForSale.subList(2, 5));
+        makeOrder(customer2, supplier1, bucketForCustomer2);
 
         response2 = restTemplate
-                .exchange(URL + "/items/getAll", HttpMethod.GET, headersEntity, ItemsDTO.class);
-        printItems(Objects.requireNonNull(response2.getBody()).getItems());
+                .exchange(URL + "/items", HttpMethod.GET, headersEntity, Item[].class);
+        System.out.println(Arrays.asList(Objects.requireNonNull(response2.getBody())));
 
-        ResponseEntity<CustomerDTO> response4 = restTemplate
-                .exchange(URL + "/customers/getAll", HttpMethod.GET, headersEntity, CustomerDTO.class);
-        System.out.println("\nCustomers: ");
-        for (Customer c : Objects.requireNonNull(response4.getBody()).getCustomers()) {
-            System.out.println(c);
-        }
+        ResponseEntity<Customer[]> response4 = restTemplate
+                .exchange(URL + "/customers", HttpMethod.GET, headersEntity, Customer[].class);
+        System.out.println( "\nCustomers: ");
+        List<Customer> customers = Arrays.asList(Objects.requireNonNull(response4.getBody()));
+        System.out.println(customers);
         System.out.println("\n");
 
-        ResponseEntity<OrdersDTO> response5 = restTemplate
-                .exchange(URL + "/orders/getAll", HttpMethod.GET, headersEntity, OrdersDTO.class);
+        ResponseEntity<Order[]> response5 = restTemplate
+                .exchange(URL + "/orders", HttpMethod.GET, headersEntity, Order[].class);
         System.out.println("\nOrders: ");
-        for (Order o : Objects.requireNonNull(response5.getBody()).getOrders()) {
-            System.out.println(o);
-        }
+        List<Order> orders = Arrays.asList(Objects.requireNonNull(response5.getBody()));
+        System.out.println(orders);
         System.out.println("\n");
     }
 
@@ -72,7 +72,7 @@ public class Main {
         createOrderDTO.setItems(bucketForCustomer);
         HttpEntity<CreateOrderDTO> createOrder = new HttpEntity<>(createOrderDTO);
         ResponseEntity<Void> response4 = restTemplate
-                .exchange(URL + "/orders/create", HttpMethod.POST,
+                .exchange(URL + "/orders", HttpMethod.POST,
                         createOrder, Void.class);
     }
 
@@ -88,32 +88,19 @@ public class Main {
     }
 
 
-    private static void addItemsOnSite(Supplier supplier1, List<Item> addedItems, List<Integer> quantities) {
+    private static void addItemsOnSite(Supplier supplier1, List<Item> addedThings, List<Integer> quantities) {
         SupplyDTO supplyDTO = new SupplyDTO();
         supplyDTO.setSupplier(supplier1);
-        supplyDTO.setItems(addedItems);
+        supplyDTO.setItems(addedThings);
         System.out.println(supplier1);
         supplyDTO.setItemQuantities(quantities);
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        String supplyJsonStr = gson.toJson(supplyDTO);
+        String serveJsonStr = gson.toJson(supplyDTO);
 
-        HttpEntity<String> suplyJson = new HttpEntity<>(supplyJsonStr, headers);
+        HttpEntity<String> serveJson = new HttpEntity<>(serveJsonStr, headers);
         ResponseEntity<Void> response1 = restTemplate
-                .exchange(URL + "/suply/suplyItems", HttpMethod.POST, suplyJson, Void.class);
+                .exchange(URL + "/suply", HttpMethod.POST, serveJson, Void.class);
 
-        System.out.println("Supplier " + supplier1.getLastName() + " has added " + addedItems);
+        System.out.println("Supplier " + supplier1.getLastName() + " has added " + addedThings);
     }
-
-    private static void printItems(List<Item> items) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("\n");
-        stringBuilder.append("\nItems: ");
-        for (Item th : items) {
-            stringBuilder.append("\n").append(th);
-        }
-        stringBuilder.append("\n");
-
-        System.out.println(stringBuilder.toString());
-    }
-
 }
